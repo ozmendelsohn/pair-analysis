@@ -1,3 +1,6 @@
+# This script contains implementation of the pair analysis method for the L12 system.
+# Please open the script using OVITO Python script modification.
+# A new particle attribute will be added: Pair, Fault Type:0: bulk; 1:ABP; 2:CSF; 3: SISF
 from ovito.data import *
 import numpy as np
 
