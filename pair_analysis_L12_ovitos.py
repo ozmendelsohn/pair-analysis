@@ -1,3 +1,8 @@
+# This script contains a full script using OVITO script python interface - ovtios.
+# The script will find the different type of stacking faults and dislocation in a given snapshot.
+# A new particle attribute will be added: Pair, Fault Type:0: bulk; 1:ABP; 2:CSF; 3: SISF
+# Also an png image will be created with the prefix pair.<input name>.
+
 from ovito.io import import_file, export_file
 from ovito.modifiers import CreateBondsModifier, DislocationAnalysisModifier, CentroSymmetryModifier, \
     ExpressionSelectionModifier, ComputePropertyModifier, DeleteSelectedModifier
