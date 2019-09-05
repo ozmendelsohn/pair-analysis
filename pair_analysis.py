@@ -1,6 +1,6 @@
 # This script contains the most straightforward implementation of the pair analysis method.
 # Please open the script using OVITO Python script modification.
-# A new particle attribute will be added: Pair.
+# A new particle attribute will be added: Pair, and for bond a chem type attribute will be added.
 from ovito.data import *
 
 def modify(frame, data):
