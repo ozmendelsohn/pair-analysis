@@ -7,7 +7,7 @@ from ovito.io import import_file, export_file
 from ovito.modifiers import CreateBondsModifier, DislocationAnalysisModifier, CentroSymmetryModifier, \
     ExpressionSelectionModifier, ComputePropertyModifier, DeleteSelectedModifier
 from ovito.data import *
-from ovito.vis import Viewport
+from ovito.vis import Viewport, TachyonRenderer
 try:
     from pair_analysis_L12 import modify as pair_analysis
 except:
@@ -81,7 +81,7 @@ pipeline.modifiers.append(ComputePropertyModifier(
     only_selected=True))
 
 data = pipeline.compute()
-# dxa remove defect mesh
+# remove dxa defect mesh
 defect_mesh = data.surfaces['dxa-defect-mesh']
 defect_mesh.vis.enabled = False
 data.cell.vis.enabled = False
@@ -89,9 +89,10 @@ data.particles.bonds.vis.enabled = False
 pipeline.add_to_scene()
 data.particles.vis.enabled = True
 
+tachyon = TachyonRenderer()
 vp = Viewport(type=Viewport.Type.Ortho, camera_dir=(-1, 0.3, -0.2))
 vp.zoom_all()
-vp.render_image(size=(1600, 1200), filename=output_name + ".png", background=(0, 0, 0), frame=8)
+vp.render_image(size=(1600, 1200), filename=output_name + ".png", background=(0, 0, 0), renderer=tachyon)
 
 
 print('----------job done!-------------')
