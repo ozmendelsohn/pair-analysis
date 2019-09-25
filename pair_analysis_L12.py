@@ -4,6 +4,7 @@
 from ovito.data import *
 import numpy as np
 
+
 def modify(frame, data):
     try:
         bond_topology = data.particles.bonds['Topology']
@@ -12,6 +13,7 @@ def modify(frame, data):
     except:
         print('please use "Create Bonds" modification and structure identifying modifier before using this modifier')
         exit()
+
     def pair_type(pair: list) -> int:
         """
         A simple function that classified the type of the bond: 0: A-A, B-B; 1: A-B
@@ -52,6 +54,15 @@ def modify(frame, data):
     # Add the Pair property to the data pipeline
     data.particles_.create_property('Pair', data=pair)
 
+    multi_hist = [[np.zeros(20), np.zeros(20)] for i in range(data.particles.count)]
+    for bond_index in range(data.particles.bonds.count):
+        a = bond_topology[bond_index, 0]
+        b = bond_topology[bond_index, 1]
+        neighbor_type = particle_type[b] - 1
+        multi_hist[a][neighbor_type][pair[b]] += 1
+        neighbor_type = particle_type[a] - 1
+        multi_hist[b][neighbor_type][pair[a]] += 1
+
     def hist_of_pairs_neighbors(particle_index):
         """
         A function crate a histogram that counts the chemical type of each nearest neighbor and also his pair parameter.
@@ -63,25 +74,16 @@ def modify(frame, data):
                 2: complex stacking faults (CSF)
                 3: super-intrinsic stacking faults (SISF)
         """
-        bond_index_list = list(bond_enumerator.bonds_of_particle(particle_index))
-        hist = [np.zeros(20), np.zeros(20)]
-        for bond_index in bond_index_list:
-            a = bond_topology[bond_index, 0]
-            b = bond_topology[bond_index, 1]
-            if a == particle_index:
-                neighbor = b
-            if b == particle_index:
-                neighbor = a
-            neighbor_type = particle_type[neighbor] - 1  # to python index
-            hist[neighbor_type][pair[neighbor]] += 1
-
+        hist = multi_hist[particle_index]
         if structure_type[particle_index] == 1:
             if particle_type[particle_index] == 1:
                 if pair[particle_index] == 11 and (hist[0][11] == 1) and hist[1][3] == 2 and hist[1][4] == 9:
                     return 1
             if particle_type[particle_index] == 2:
-                if (pair[particle_index] == 3 and hist[0][11] == 2 and hist[0][12] == 1 and hist[1][3] == 1 and hist[1][4] == 8) \
-                or (pair[particle_index] == 4 and hist[0][11] == 3 and hist[0][12] == 1 and hist[1][3] == 3 and hist[1][4] == 5):
+                if (pair[particle_index] == 3 and hist[0][11] == 2 and hist[0][12] == 1 and hist[1][3] == 1 and hist[1][
+                    4] == 8) \
+                        or (pair[particle_index] == 4 and hist[0][11] == 3 and hist[0][12] == 1 and hist[1][3] == 3 and
+                            hist[1][4] == 5):
                     return 1
         if structure_type[particle_index] == 2:
             if particle_type[particle_index] == 1:
@@ -93,7 +95,7 @@ def modify(frame, data):
                 if pair[particle_index] == 4 and hist[0][12] >= 2 and hist[1][4] >= 4:
                     return 3
                 if pair[particle_index] == 3 and hist[0][11] >= 2 and hist[1][4] >= 4 \
-                or pair[particle_index] == 4 and hist[0][11] >= 2 and hist[1][3] >= 2 and hist[1][4] >= 2:
+                        or pair[particle_index] == 4 and hist[0][11] >= 2 and hist[1][3] >= 2 and hist[1][4] >= 2:
                     return 2
         return 0
 
@@ -108,4 +110,3 @@ def modify(frame, data):
             print("There are %i particles with the following properties:" % data.particles.count)
             for property_name in data.particles.keys():
                 print("  '%s'" % property_name)
-
